@@ -1640,15 +1640,15 @@ function touchDragStart(e){
 }
 
 function renderTxItem(s) {
-  var selected = selTx.includes(s.id);
-  var tl = txTimelines[s.id] || {};
-  var timelineHTML = '';
+  const selected = selTx.includes(s.id);
+  const tl = txTimelines[s.id] || {};
+  let timelineHTML = '';
   if (selected) {
-    var countOptions = [1,2,3,4,5,6,8,10,12].map(function(n) {
-      var sel = tl.count == n ? ' selected' : '';
+    const countOptions = [1,2,3,4,5,6,8,10,12].map(n => {
+      const sel = tl.count == n ? ' selected' : '';
       return '<option value="' + n + '"' + sel + '>' + n + ' treatment' + (n!==1?'s':'') + '</option>';
     }).join('');
-    var freqOptions = [
+    const freqOptions = [
       ['1 week apart','Weekly'],
       ['2 weeks apart','Every 2 weeks'],
       ['3-4 weeks apart','Every 3-4 weeks'],
@@ -1656,64 +1656,94 @@ function renderTxItem(s) {
       ['6-8 weeks apart','Every 6-8 weeks'],
       ['3 months apart','Every 3 months'],
       ['as needed','As needed']
-    ].map(function(item) {
-      var val = item[0]; var lbl = item[1];
-      var sel = tl.freq === val ? ' selected' : '';
+    ].map(([val,lbl]) => {
+      const sel = tl.freq === val ? ' selected' : '';
       return '<option value="' + val + '"' + sel + '>' + lbl + '</option>';
     }).join('');
 
-    var summaryHTML = '';
+    let summaryHTML = '';
     if (tl.count && tl.freq) {
-      summaryHTML = '<div style="grid-column:1/-1;background:var(--wh);border-radius:7px;padding:8px 10px;border:1px solid var(--bd)"><span style="font-size:10px;font-weight:600;color:var(--dk)">' + tl.count + ' x ' + s.name + ', ' + tl.freq + '</span></div>';
+      summaryHTML = '<div style="grid-column:1/-1;background:var(--wh);border-radius:7px;padding:8px 10px;border:1px solid var(--bd)">'
+        + '<span style="font-size:10px;font-weight:600;color:var(--dk)">' + tl.count + ' x ' + s.name + ', ' + tl.freq + '</span>'
+        + '</div>';
     }
-    var sid = s.id;
+
     timelineHTML = '<div style="background:#3d443510;border:1.5px solid var(--dk);border-top:none;border-radius:0 0 9px 9px;padding:10px 12px;display:grid;grid-template-columns:1fr 1fr;gap:8px">'
-      + '<div><div style="font-size:8px;font-weight:700;color:var(--dk);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">No. of Treatments</div>'
-      + '<select onchange="var el=this;setTimeline(el.dataset.sid,el.dataset.key,el.value)" data-key="count" data-sid="' + sid + '" onclick="event.stopPropagation()" style="width:100%;background:var(--wh);border:1.5px solid var(--bd);border-radius:7px;padding:6px 8px;font-family:Poppins,sans-serif;font-size:11px;color:var(--tx);outline:none"><option value="">Select</option>' + countOptions + '</select></div>'
-      + '<div><div style="font-size:8px;font-weight:700;color:var(--dk);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Frequency</div>'
-      + '<select onchange="var el=this;setTimeline(el.dataset.sid,el.dataset.key,el.value)" data-key="freq" data-sid="' + sid + '" onclick="event.stopPropagation()" style="width:100%;background:var(--wh);border:1.5px solid var(--bd);border-radius:7px;padding:6px 8px;font-family:Poppins,sans-serif;font-size:11px;color:var(--tx);outline:none"><option value="">Select</option>' + freqOptions + '</select></div>'
-      + summaryHTML + '</div>';
+      + '<div>'
+      + '<div style="font-size:8px;font-weight:700;color:var(--dk);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">No. of Treatments</div>'
+      + '<select onchange="setTimeline('' + s.id + '','count',this.value)" onclick="event.stopPropagation()" style="width:100%;background:var(--wh);border:1.5px solid var(--bd);border-radius:7px;padding:6px 8px;font-family:Poppins,sans-serif;font-size:11px;color:var(--tx);outline:none">'
+      + '<option value="">Select</option>' + countOptions
+      + '</select>'
+      + '</div>'
+      + '<div>'
+      + '<div style="font-size:8px;font-weight:700;color:var(--dk);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Frequency</div>'
+      + '<select onchange="setTimeline('' + s.id + '','freq',this.value)" onclick="event.stopPropagation()" style="width:100%;background:var(--wh);border:1.5px solid var(--bd);border-radius:7px;padding:6px 8px;font-family:Poppins,sans-serif;font-size:11px;color:var(--tx);outline:none">'
+      + '<option value="">Select</option>' + freqOptions
+      + '</select>'
+      + '</div>'
+      + summaryHTML
+      + '</div>';
   }
-  var cls = selected ? 'on' : '';
-  var rad = selected ? '9px 9px 0 0' : '9px';
-  return '<div style="margin-bottom:8px"><div class="lib-item ' + cls + '" onclick="toggleTxPB(this.dataset.id)" data-id="' + s.id + '" style="margin-bottom:0;border-radius:' + rad + '"><div style="flex:1"><div class="li-n">' + s.name + '</div><div class="li-s">' + s.dur + ' &nbsp;·&nbsp; ' + s.price + '</div></div><div class="li-chk ' + cls + '">' + (selected?'+':'') + '</div></div>' + timelineHTML + '</div>';
+
+  return '<div style="margin-bottom:8px">'
+    + '<div class="lib-item ' + (selected?'on':'') + '" onclick="toggleTxPB('' + s.id + '')" style="margin-bottom:0;border-radius:' + (selected?'9px 9px 0 0':'9px') + '">'
+    + '<div style="flex:1"><div class="li-n">' + s.name + '</div><div class="li-s">' + s.dur + ' &nbsp;·&nbsp; ' + s.price + '</div></div>'
+    + '<div class="li-chk ' + (selected?'on':'') + '">' + (selected?'+':'') + '</div>'
+    + '</div>'
+    + timelineHTML
+    + '</div>';
 }
 
 function renderInjItem(s) {
-  var selected = selTx.includes(s.id);
-  var tl = txTimelines[s.id] || {};
-  var timelineHTML = '';
+  const selected = selTx.includes(s.id);
+  const tl = txTimelines[s.id] || {};
+  let timelineHTML = '';
   if (selected) {
-    var countOptions = [1,2,3,4,5,6].map(function(n) {
-      var sel = tl.count == n ? ' selected' : '';
+    const countOptions = [1,2,3,4,5,6].map(n => {
+      const sel = tl.count == n ? ' selected' : '';
       return '<option value="' + n + '"' + sel + '>' + n + ' session' + (n!==1?'s':'') + '</option>';
     }).join('');
-    var freqOptions = [
+    const freqOptions = [
       ['4-5 weeks apart','Every 4-5 weeks'],
       ['6-8 weeks apart','Every 6-8 weeks'],
       ['3 months apart','Every 3 months'],
       ['as needed','As needed']
-    ].map(function(item) {
-      var val = item[0]; var lbl = item[1];
-      var sel = tl.freq === val ? ' selected' : '';
+    ].map(([val,lbl]) => {
+      const sel = tl.freq === val ? ' selected' : '';
       return '<option value="' + val + '"' + sel + '>' + lbl + '</option>';
     }).join('');
 
-    var summaryHTML = '';
+    let summaryHTML = '';
     if (tl.count && tl.freq) {
-      summaryHTML = '<div style="grid-column:1/-1;background:var(--wh);border-radius:7px;padding:8px 10px;border:1px solid var(--bd)"><span style="font-size:10px;font-weight:600;color:var(--dk)">' + tl.count + ' x ' + s.name + ', ' + tl.freq + '</span></div>';
+      summaryHTML = '<div style="grid-column:1/-1;background:var(--wh);border-radius:7px;padding:8px 10px;border:1px solid var(--bd)">'
+        + '<span style="font-size:10px;font-weight:600;color:var(--dk)">' + tl.count + ' x ' + s.name + ', ' + tl.freq + '</span>'
+        + '</div>';
     }
-    var sid = s.id;
+
     timelineHTML = '<div style="background:#3d443510;border:1.5px solid var(--dk);border-top:none;border-radius:0 0 9px 9px;padding:10px 12px;display:grid;grid-template-columns:1fr 1fr;gap:8px">'
-      + '<div><div style="font-size:8px;font-weight:700;color:var(--dk);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">No. of Sessions</div>'
-      + '<select onchange="var el=this;setTimeline(el.dataset.sid,el.dataset.key,el.value)" data-key="count" data-sid="' + sid + '" onclick="event.stopPropagation()" style="width:100%;background:var(--wh);border:1.5px solid var(--bd);border-radius:7px;padding:6px 8px;font-family:Poppins,sans-serif;font-size:11px;color:var(--tx);outline:none"><option value="">Select</option>' + countOptions + '</select></div>'
-      + '<div><div style="font-size:8px;font-weight:700;color:var(--dk);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Frequency</div>'
-      + '<select onchange="var el=this;setTimeline(el.dataset.sid,el.dataset.key,el.value)" data-key="freq" data-sid="' + sid + '" onclick="event.stopPropagation()" style="width:100%;background:var(--wh);border:1.5px solid var(--bd);border-radius:7px;padding:6px 8px;font-family:Poppins,sans-serif;font-size:11px;color:var(--tx);outline:none"><option value="">Select</option>' + freqOptions + '</select></div>'
-      + summaryHTML + '</div>';
+      + '<div>'
+      + '<div style="font-size:8px;font-weight:700;color:var(--dk);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">No. of Sessions</div>'
+      + '<select onchange="setTimeline('' + s.id + '','count',this.value)" onclick="event.stopPropagation()" style="width:100%;background:var(--wh);border:1.5px solid var(--bd);border-radius:7px;padding:6px 8px;font-family:Poppins,sans-serif;font-size:11px;color:var(--tx);outline:none">'
+      + '<option value="">Select</option>' + countOptions
+      + '</select>'
+      + '</div>'
+      + '<div>'
+      + '<div style="font-size:8px;font-weight:700;color:var(--dk);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Frequency</div>'
+      + '<select onchange="setTimeline('' + s.id + '','freq',this.value)" onclick="event.stopPropagation()" style="width:100%;background:var(--wh);border:1.5px solid var(--bd);border-radius:7px;padding:6px 8px;font-family:Poppins,sans-serif;font-size:11px;color:var(--tx);outline:none">'
+      + '<option value="">Select</option>' + freqOptions
+      + '</select>'
+      + '</div>'
+      + summaryHTML
+      + '</div>';
   }
-  var cls = selected ? 'on' : '';
-  var rad = selected ? '9px 9px 0 0' : '9px';
-  return '<div style="margin-bottom:8px"><div class="lib-item ' + cls + '" onclick="toggleTxPB(this.dataset.id)" data-id="' + s.id + '" style="margin-bottom:0;border-radius:' + rad + '"><div style="flex:1"><div class="li-n">' + s.name + '</div><div class="li-s">' + s.dur + ' &nbsp;·&nbsp; ' + s.price + '</div></div><div class="li-chk ' + cls + '">' + (selected?'+':'') + '</div></div>' + timelineHTML + '</div>';
+
+  return '<div style="margin-bottom:8px">'
+    + '<div class="lib-item ' + (selected?'on':'') + '" onclick="toggleTxPB('' + s.id + '')" style="margin-bottom:0;border-radius:' + (selected?'9px 9px 0 0':'9px') + '">'
+    + '<div style="flex:1"><div class="li-n">' + s.name + '</div><div class="li-s">' + s.dur + ' &nbsp;·&nbsp; ' + s.price + '</div></div>'
+    + '<div class="li-chk ' + (selected?'on':'') + '">' + (selected?'+':'') + '</div>'
+    + '</div>'
+    + timelineHTML
+    + '</div>';
 }
 
 function renderPBS3(){
@@ -1724,7 +1754,7 @@ function renderPBS3(){
   cats.forEach(cat => {
     html += '<div style="margin-bottom:6px">';
     html += '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;margin-bottom:5px">';
-    html += '<span style="font-family:Lora,serif;font-size:11px;font-weight:600;color:var(--tx)">' + cat + '</span>';
+    html += '<span style="font-family:'Lora',serif;font-size:11px;font-weight:600;color:var(--tx)">' + cat + '</span>';
     html += '<div style="flex:1;height:1px;background:var(--bd)"></div>';
     html += '</div>';
     SKIN_SVCS.filter(s=>s.cat===cat).forEach(s => { html += renderTxItem(s); });
@@ -1734,7 +1764,7 @@ function renderPBS3(){
   // Cosmetic injectables
   html += '<div style="margin-top:4px">';
   html += '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;margin-bottom:5px">';
-  html += '<span style="font-family:Lora,serif;font-size:11px;font-weight:600;color:var(--tx)">Cosmetic Injectables</span>';
+  html += '<span style="font-family:'Lora',serif;font-size:11px;font-weight:600;color:var(--tx)">Cosmetic Injectables</span>';
   html += '<div style="flex:1;height:1px;background:var(--bd)"></div></div>';
   html += '<div style="background:var(--am2);border:1px solid var(--am3);border-radius:9px;padding:9px 12px;margin-bottom:8px">';
   html += '<div style="font-size:8px;font-weight:700;color:var(--am);text-transform:uppercase;letter-spacing:.1em;margin-bottom:2px">Prescription Only</div>';
